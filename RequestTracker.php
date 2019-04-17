@@ -543,6 +543,31 @@ class RequestTracker
                 $lastkey = $matches[1];
                 $responseArray[$lastkey] = $matches[2];
             }
+            elseif ((bool) $line && !is_null($lastkey)) {
+                if (preg_match('/\s{4}/i', $line)){
+                    $line = preg_replace('/\s{4}/i', '', $line);
+                }
+                if ($lastkey !== null){
+                        $responseArray[$lastkey] .= PHP_EOL . $line;
+                }
+            }
+            elseif(is_null($lastkey) && preg_match('/\t/', $line)) {
+                foreach ($response as $line) {
+                    if (preg_match('/\t/', $line)) {
+                        if (is_null($lastkey)) {
+                            $lastkey ++;
+                            $fields = explode("\t", $line);
+                        }
+                        elseif (! is_null($lastkey)) {
+                            $result = explode("\t", $line);
+                                foreach($fields as $key => $val) {
+                                    $combined[$val] = $result[$key];
+                                }
+                            $responseArray[] = $combined;
+                        }
+                    }
+                }
+            }            
         }
 
         return $responseArray;
